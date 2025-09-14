@@ -8,6 +8,7 @@ using TestTask.Service;
 using TestTask.Entity;
 using TestTask.Properties;
 using System.Windows.Forms.DataVisualization.Charting;
+using SortOrder = System.Windows.Forms.SortOrder;
 
 namespace TestTask
 {
@@ -15,11 +16,26 @@ namespace TestTask
     {
         private string connectionString;
         private DatabaseService databaseService;
+        private BindingSource employeesBindingSource;
+        private List<Employee> currentEmployees;
+        private string currentSortColumn = "";
+        private SortOrder currentSortOrder = SortOrder.None;
 
         public FormMain()
         {
             InitializeComponent();
+            InitializeDataGridView();
             LoadConnectionSettings();
+        }
+
+        private void InitializeDataGridView()
+        {
+            employeesBindingSource = new BindingSource();
+            dataGridView1.DataSource = employeesBindingSource;
+
+            dataGridView1.ColumnHeaderMouseDoubleClick += DataGridView1_ColumnHeaderMouseClick;
+            dataGridView1.AllowUserToResizeColumns = false;
+            dataGridView1.AllowUserToOrderColumns = false;
         }
 
         private void LoadConnectionSettings()
@@ -163,17 +179,166 @@ namespace TestTask
                 string positionFilter = comboBoxPositionFilter.SelectedIndex > 0 ? comboBoxPositionFilter.SelectedItem.ToString() : null;
                 string lastNameFilter = !string.IsNullOrWhiteSpace(textBoxLastNameFilter.Text) ? textBoxLastNameFilter.Text : null;
 
-                var employees = databaseService.GetEmployees(statusFilter, departmentFilter, positionFilter, lastNameFilter);
+                currentEmployees = databaseService.GetEmployees(statusFilter, departmentFilter, positionFilter, lastNameFilter);
+                employeesBindingSource.DataSource = currentEmployees;
+                
 
                 dataGridView1.DataBindingComplete -= DataGridView1_DataBindingComplete;
                 dataGridView1.DataBindingComplete += DataGridView1_DataBindingComplete;
 
-                dataGridView1.DataSource = employees;
+                ConfigureDataGridViewColumns();
+                UpdateRowColors();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка загрузки сотрудников: {ex.Message}", "Ошибка",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ConfigureDataGridViewColumns()
+        {
+            if (dataGridView1.Columns.Count > 0)
+            {
+                if (dataGridView1.Columns["Id"] != null)
+                    dataGridView1.Columns["Id"].Visible = false;
+
+                if (dataGridView1.Columns["IsFired"] != null)
+                    dataGridView1.Columns["IsFired"].Visible = false;
+
+                ConfigureColumn("LastName", "Фамилия", 100);
+                ConfigureColumn("FirstName", "Имя", 100);
+                ConfigureColumn("MiddleName", "Отчество", 100);
+                ConfigureColumn("StatusName", "Статус", 100);
+                ConfigureColumn("DepartmentName", "Отдел", 120);
+                ConfigureColumn("PositionName", "Должность", 120);
+                ConfigureColumn("HireDate", "Дата приема", 100, "dd.MM.yyyy");
+                ConfigureColumn("FireDate", "Дата увольнения", 100, "dd.MM.yyyy");
+                ConfigureColumn("FullName", "Полное имя", 150);
+            }
+        }
+
+        private void ConfigureColumn(string columnName, string headerText, int width, string format = null)
+        {
+            if (dataGridView1.Columns[columnName] != null)
+            {
+                dataGridView1.Columns[columnName].HeaderText = headerText;
+                dataGridView1.Columns[columnName].Width = width;
+                dataGridView1.Columns[columnName].ReadOnly = true;
+                dataGridView1.Columns[columnName].SortMode = DataGridViewColumnSortMode.Programmatic;
+
+                if (!string.IsNullOrEmpty(format))
+                {
+                    dataGridView1.Columns[columnName].DefaultCellStyle.Format = format;
+                }
+            }
+        }
+
+        private void DataGridView1_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (currentEmployees == null || currentEmployees.Count == 0)
+            {
+                return;
+            }
+
+            string columnName = dataGridView1.Columns[e.ColumnIndex].DataPropertyName;
+            if (string.IsNullOrEmpty(columnName))
+            {
+                return;
+            }
+
+            SortOrder newSortOrder;
+
+            if (columnName == currentSortColumn)
+            {
+                newSortOrder = currentSortOrder == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
+            }
+            else
+            {
+                newSortOrder = SortOrder.Ascending;
+            }
+
+            SortData(columnName, newSortOrder);
+
+            currentSortColumn = columnName;
+            currentSortOrder = newSortOrder;
+
+            UpdateColumnHeadersSortGlyph(e.ColumnIndex, newSortOrder);
+        }
+
+        private void SortData(string columnName, SortOrder sortOrder)
+        {
+            if (currentEmployees == null)
+            {
+                return;
+            }
+
+            IEnumerable<Employee> sortedEmployees = null;
+
+            switch (columnName)
+            {
+                case "LastName":
+                    sortedEmployees = sortOrder == SortOrder.Ascending ?
+                        currentEmployees.OrderBy(e => e.LastName) :
+                        currentEmployees.OrderByDescending(e => e.LastName);
+                    break;
+                case "FirstName":
+                    sortedEmployees = sortOrder == SortOrder.Ascending ?
+                        currentEmployees.OrderBy(e => e.FirstName) :
+                        currentEmployees.OrderByDescending(e => e.FirstName);
+                    break;
+                case "MiddleName":
+                    sortedEmployees = sortOrder == SortOrder.Ascending ?
+                        currentEmployees.OrderBy(e => e.MiddleName) :
+                        currentEmployees.OrderByDescending(e => e.MiddleName);
+                    break;
+                case "StatusName":
+                    sortedEmployees = sortOrder == SortOrder.Ascending ?
+                        currentEmployees.OrderBy(e => e.StatusName) :
+                        currentEmployees.OrderByDescending(e => e.StatusName);
+                    break;
+                case "DepartmentName":
+                    sortedEmployees = sortOrder == SortOrder.Ascending ?
+                        currentEmployees.OrderBy(e => e.DepartmentName) :
+                        currentEmployees.OrderByDescending(e => e.DepartmentName);
+                    break;
+                case "PositionName":
+                    sortedEmployees = sortOrder == SortOrder.Ascending ?
+                        currentEmployees.OrderBy(e => e.PositionName) :
+                        currentEmployees.OrderByDescending(e => e.PositionName);
+                    break;
+                case "HireDate":
+                    sortedEmployees = sortOrder == SortOrder.Ascending ?
+                        currentEmployees.OrderBy(e => e.HireDate) :
+                        currentEmployees.OrderByDescending(e => e.HireDate);
+                    break;
+                case "FireDate":
+                    sortedEmployees = sortOrder == SortOrder.Ascending ?
+                        currentEmployees.OrderBy(e => e.FireDate) :
+                        currentEmployees.OrderByDescending(e => e.FireDate);
+                    break;
+                case "FullName":
+                    sortedEmployees = sortOrder == SortOrder.Ascending ?
+                        currentEmployees.OrderBy(e => e.FullName) :
+                        currentEmployees.OrderByDescending(e => e.FullName);
+                    break;
+                default:
+                    return;
+            }
+
+            employeesBindingSource.DataSource = sortedEmployees.ToList();
+        }
+
+        private void UpdateColumnHeadersSortGlyph(int sortedColumnIndex, SortOrder direction)
+        {
+            foreach (DataGridViewColumn column in dataGridView1.Columns)
+            {
+                column.HeaderCell.SortGlyphDirection = SortOrder.None;
+            }
+
+            if (sortedColumnIndex >= 0 && sortedColumnIndex < dataGridView1.Columns.Count)
+            {
+                dataGridView1.Columns[sortedColumnIndex].HeaderCell.SortGlyphDirection = direction;
             }
         }
 
@@ -350,6 +515,10 @@ namespace TestTask
             comboBoxDepartmentFilter.SelectedIndex = 0;
             comboBoxPositionFilter.SelectedIndex = 0;
             textBoxLastNameFilter.Text = "";
+
+            currentSortColumn = "";
+            currentSortOrder = SortOrder.None;
+
             LoadEmployees();
         }
 
@@ -362,7 +531,20 @@ namespace TestTask
         {
             if (dataGridView1.Rows.Count > 0)
             {
+                ConfigureDataGridViewColumns();
                 UpdateRowColors();
+
+                if (!string.IsNullOrEmpty(currentSortColumn))
+                {
+                    for (int i = 0; i < dataGridView1.Columns.Count; i++)
+                    {
+                        if (dataGridView1.Columns[i].DataPropertyName == currentSortColumn)
+                        {
+                            dataGridView1.Columns[i].HeaderCell.SortGlyphDirection = currentSortOrder;
+                            break;
+                        }
+                    }
+                }
             }
         }
     }

@@ -28,10 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.panel1 = new System.Windows.Forms.Panel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -42,6 +42,7 @@
             this.label8 = new System.Windows.Forms.Label();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.groupBoxFilters = new System.Windows.Forms.GroupBox();
+            this.buttonApplyFilters = new System.Windows.Forms.Button();
             this.textBoxLastNameFilter = new System.Windows.Forms.TextBox();
             this.comboBoxDepartmentFilter = new System.Windows.Forms.ComboBox();
             this.comboBoxPositionFilter = new System.Windows.Forms.ComboBox();
@@ -68,7 +69,6 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.buttonApplyFilters = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -168,6 +168,7 @@
             // 
             this.dataGridView1.AllowUserToAddRows = false;
             this.dataGridView1.AllowUserToDeleteRows = false;
+            this.dataGridView1.BackgroundColor = System.Drawing.Color.AliceBlue;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.dataGridView1.Location = new System.Drawing.Point(44, 176);
@@ -175,6 +176,7 @@
             this.dataGridView1.ReadOnly = true;
             this.dataGridView1.Size = new System.Drawing.Size(1143, 188);
             this.dataGridView1.TabIndex = 1;
+            this.dataGridView1.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DataGridView1_ColumnHeaderMouseClick);
             this.dataGridView1.DataBindingComplete += new System.Windows.Forms.DataGridViewBindingCompleteEventHandler(this.DataGridView1_DataBindingComplete);
             // 
             // groupBoxFilters
@@ -195,6 +197,16 @@
             this.groupBoxFilters.TabIndex = 0;
             this.groupBoxFilters.TabStop = false;
             this.groupBoxFilters.Text = "Фильтры";
+            // 
+            // buttonApplyFilters
+            // 
+            this.buttonApplyFilters.Location = new System.Drawing.Point(70, 107);
+            this.buttonApplyFilters.Name = "buttonApplyFilters";
+            this.buttonApplyFilters.Size = new System.Drawing.Size(140, 38);
+            this.buttonApplyFilters.TabIndex = 9;
+            this.buttonApplyFilters.Text = "Применить фильтры";
+            this.buttonApplyFilters.UseVisualStyleBackColor = true;
+            this.buttonApplyFilters.Click += new System.EventHandler(this.buttonApplyFilters_Click);
             // 
             // textBoxLastNameFilter
             // 
@@ -301,22 +313,22 @@
             // 
             // chartStats
             // 
-            chartArea4.AxisX.Title = "Дата";
-            chartArea4.AxisY.Title = "Количество сотрудников";
-            chartArea4.Name = "ChartArea1";
-            this.chartStats.ChartAreas.Add(chartArea4);
-            legend4.Name = "Legend1";
-            this.chartStats.Legends.Add(legend4);
+            chartArea2.AxisX.Title = "Дата";
+            chartArea2.AxisY.Title = "Количество сотрудников";
+            chartArea2.Name = "ChartArea1";
+            this.chartStats.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.chartStats.Legends.Add(legend2);
             this.chartStats.Location = new System.Drawing.Point(198, 197);
             this.chartStats.Name = "chartStats";
-            series7.ChartArea = "ChartArea1";
-            series7.Legend = "Legend1";
-            series7.Name = "Принятые";
-            series8.ChartArea = "ChartArea1";
-            series8.Legend = "Legend1";
-            series8.Name = "Уволенные";
-            this.chartStats.Series.Add(series7);
-            this.chartStats.Series.Add(series8);
+            series3.ChartArea = "ChartArea1";
+            series3.Legend = "Legend1";
+            series3.Name = "Принятые";
+            series4.ChartArea = "ChartArea1";
+            series4.Legend = "Legend1";
+            series4.Name = "Уволенные";
+            this.chartStats.Series.Add(series3);
+            this.chartStats.Series.Add(series4);
             this.chartStats.Size = new System.Drawing.Size(447, 235);
             this.chartStats.TabIndex = 2;
             this.chartStats.Text = "chart1";
@@ -325,6 +337,7 @@
             // 
             this.dataGridView2.AllowUserToAddRows = false;
             this.dataGridView2.AllowUserToDeleteRows = false;
+            this.dataGridView2.BackgroundColor = System.Drawing.Color.AliceBlue;
             this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView2.Location = new System.Drawing.Point(674, 197);
             this.dataGridView2.Name = "dataGridView2";
@@ -456,16 +469,6 @@
             this.ToolStripMenuItem.Size = new System.Drawing.Size(239, 22);
             this.ToolStripMenuItem.Text = "Настройка подключения к БД";
             this.ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
-            // 
-            // buttonApplyFilters
-            // 
-            this.buttonApplyFilters.Location = new System.Drawing.Point(70, 107);
-            this.buttonApplyFilters.Name = "buttonApplyFilters";
-            this.buttonApplyFilters.Size = new System.Drawing.Size(140, 38);
-            this.buttonApplyFilters.TabIndex = 9;
-            this.buttonApplyFilters.Text = "Применить фильтры";
-            this.buttonApplyFilters.UseVisualStyleBackColor = true;
-            this.buttonApplyFilters.Click += new System.EventHandler(this.buttonApplyFilters_Click);
             // 
             // FormMain
             // 
